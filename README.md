@@ -103,7 +103,7 @@ Ensure you have Python 3.10+ installed along with `pip` and standard build utili
 ### 2. Environment Setup
 ```bash
 # Clone repository
-git clone [https://github.com/your-username/snake-rl.git](https://github.com/your-username/snake-rl.git)
+git clone [https://github.com/tonymusic0825/snake-rl.git](https://github.com/tonymusic0825/snake-rl.git)
 cd snake-rl
 
 # Create virtual environment
