@@ -9,7 +9,7 @@ def train(args):
     """Executes the training loop with optional target network updates and visual rendering."""
     env = SnakeEnv(grid_w=args.grid_size, grid_h=args.grid_size)
     agent = DQNAgent(
-        input_dim=11,
+        input_dim=16,
         action_dim=3,
         lr=args.lr,
         gamma=args.gamma,
@@ -52,10 +52,6 @@ def train(args):
         # 5. End of Episode: Train Long Memory (Experience Replay Buffer)
         loss = agent.train_replay_batch()
 
-        # 6. Synchronize Target Network Periodically
-        if episode % args.target_update_freq == 0:
-            agent.update_target_network()
-
         score = info["score"]
         total_score += score
 
@@ -85,7 +81,7 @@ def train(args):
 def evaluate(args):
     """Evaluates a trained checkpoint visually using PyGame."""
     env = SnakeEnv(grid_w=args.grid_size, grid_h=args.grid_size)
-    agent = DQNAgent(input_dim=11, action_dim=3)
+    agent = DQNAgent(input_dim=16, action_dim=3)
     
     try:
         agent.load_checkpoint(args.checkpoint)
@@ -126,7 +122,6 @@ def main():
     train_parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
     train_parser.add_argument("--gamma", type=float, default=0.9, help="Discount factor")
     train_parser.add_argument("--epsilon-decay", type=float, default=0.995, help="Epsilon decay rate")
-    train_parser.add_argument("--target-update-freq", type=int, default=10, help="Target network update episode frequency")
     train_parser.add_argument("--log-freq", type=int, default=10, help="Terminal logging episode frequency")
     train_parser.add_argument("--checkpoint", type=str, default="checkpoints/best_dqn.pth", help="Checkpoint file path")
     train_parser.add_argument("--render", action="store_true", help="Enable PyGame visual rendering during training")

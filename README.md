@@ -123,7 +123,7 @@ The unified entry point `main.py` provides execution flags for fast training and
 ### High-Speed Headless Training
 Train an agent without UI overhead (maximizes step output):
 ```bash
-python main.py train --episodes 1500 --grid-size 20 --lr 0.001 --target-update-freq 10
+python main.py train --episodes 1500 --grid-size 20 --lr 0.001
 ```
 
 ### Visual Training Mode
@@ -135,7 +135,7 @@ python main.py train --episodes 500 --render --fps 60
 ### Visual Evaluation Mode
 Evaluate a pre-trained serialized model checkpoint:
 ```bash
-python main.py eval --checkpoint checkpoints/best_dqn.pth --eval-episodes 5 --fps 20
+python main.py eval --checkpoint checkpoints/best_ddqn.pth --eval-episodes 5 --fps 20
 ```
 
 ### CLI Configuration Flags

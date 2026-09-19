@@ -106,8 +106,12 @@ class SnakeEnv:
             self._spawn_food()
         else:
             self.snake.pop()
-            # Slight step penalty or small reward based on distance can be added here
+            # Reward shaping based on Manhattan distance
+            old_dist = abs(head_x - self.food[0]) + abs(head_y - self.food[1])
+            new_dist = abs(new_head[0] - self.food[0]) + abs(new_head[1] - self.food[1])
+            reward = 1.0 if new_dist < old_dist else -1.0
 
+        # Add this line back to the very end of the step() method
         return self.get_obs(), reward, terminated, {"score": self.score}
 
     def is_collision(self, pt: Tuple[int, int] = None) -> bool:
@@ -144,23 +148,39 @@ class SnakeEnv:
         pt_right = (head_x + dir_right[0], head_y + dir_right[1])
         pt_left = (head_x + dir_left[0], head_y + dir_left[1])
 
+        pt_straight_2 = (head_x + 2 * dir_straight[0], head_y + 2 * dir_straight[1])
+        pt_right_2 = (head_x + 2 * dir_right[0], head_y + 2 * dir_right[1])
+        pt_left_2 = (head_x + 2 * dir_left[0], head_y + 2 * dir_left[1])
+
+        food_dist_x = (self.food[0] - head_x) / self.grid_w
+        food_dist_y = (self.food[1] - head_y) / self.grid_h
+
         obs = [
-            # Danger relative features (3)
+            # Danger relative features (1 step)
             self.is_collision(pt_straight),
             self.is_collision(pt_right),
             self.is_collision(pt_left),
+            
+            # Danger relative features (2 steps)
+            self.is_collision(pt_straight_2),
+            self.is_collision(pt_right_2),
+            self.is_collision(pt_left_2),
 
-            # Current absolute direction features (4)
+            # Current absolute direction features
             self.direction == Direction.LEFT,
             self.direction == Direction.RIGHT,
             self.direction == Direction.UP,
             self.direction == Direction.DOWN,
 
-            # Food location relative to head (4)
-            self.food[0] < head_x,  # Food is Left
-            self.food[0] > head_x,  # Food is Right
-            self.food[1] < head_y,  # Food is Up
-            self.food[1] > head_y   # Food is Down
+            # Food location booleans
+            self.food[0] < head_x,
+            self.food[0] > head_x,
+            self.food[1] < head_y,
+            self.food[1] > head_y,
+            
+            # Normalized distance to food
+            food_dist_x,
+            food_dist_y
         ]
 
         return np.array(obs, dtype=np.float32)

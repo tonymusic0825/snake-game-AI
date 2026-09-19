@@ -2,14 +2,14 @@ import random
 from collections import deque
 import numpy as np
 import torch
-from src.model import QNetwork, DQNTrainer
+from src.model import DuelingQNetwork, DQNTrainer
 
 class DQNAgent:
     """Agent orchestrating action selection, experience replay, and learning."""
 
     def __init__(
         self,
-        input_dim: int = 11,
+        input_dim: int = 16,
         action_dim: int = 3,
         lr: float = 1e-3,
         gamma: float = 0.9,
@@ -29,8 +29,8 @@ class DQNAgent:
         self.epsilon_decay = epsilon_decay
 
         # Online Network (Policy) and Target Network
-        self.model = QNetwork(input_dim=input_dim, output_dim=action_dim)
-        self.target_model = QNetwork(input_dim=input_dim, output_dim=action_dim)
+        self.model = DuelingQNetwork(input_dim=input_dim, output_dim=action_dim)
+        self.target_model = DuelingQNetwork(input_dim=input_dim, output_dim=action_dim)
         
         # Initialize target network with online network weights
         self.target_model.load_state_dict(self.model.state_dict())
@@ -58,8 +58,9 @@ class DQNAgent:
             return int(torch.argmax(prediction).item())
 
     def train_step(self, state, action, reward, next_state, done) -> float:
-        """Trains on single online transition (short-term memory)."""
-        return self.trainer.train_step(state, action, reward, next_state, done)
+        loss = self.trainer.train_step(state, action, reward, next_state, done)
+        self.trainer.soft_update_target_network()
+        return loss
 
     def train_replay_batch(self) -> float:
         """Trains on random mini-batch sampled from memory buffer (long-term memory)."""
@@ -71,6 +72,9 @@ class DQNAgent:
         states, actions, rewards, next_states, dones = zip(*sample_batch)
         loss = self.trainer.train_step(states, actions, rewards, next_states, dones)
 
+        # ADD THIS LINE: Soft update target network every batch
+        self.trainer.soft_update_target_network()
+
         # Decay epsilon after training on replay buffer
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
@@ -78,11 +82,7 @@ class DQNAgent:
 
         return loss
 
-    def update_target_network(self) -> None:
-        """Triggers target network weight update."""
-        self.trainer.update_target_network()
-
-    def save_checkpoint(self, filepath: str = "checkpoints/best_dqn.pth") -> None:
+    def save_checkpoint(self, filepath: str = "checkpoints/best_ddqn.pth") -> None:
         """Saves current online network state dictionary."""
         import os
         os.makedirs(os.path.dirname(filepath), exist_ok=True)

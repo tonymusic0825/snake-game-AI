@@ -9,7 +9,7 @@ class SnakeRenderer:
     BLACK = (15, 15, 15)
     WHITE = (255, 255, 255)
     GREEN = (46, 204, 113)
-    HEAD_GREEN = (39, 174, 96)
+    HEAD_BLUE = (52, 152, 219) 
     RED = (231, 76, 60)
     GRAY = (40, 40, 40)
 
@@ -37,16 +37,16 @@ class SnakeRenderer:
 
         self.screen.fill(self.BLACK)
 
-        # 1. Draw Snake Body
+       # 1. Draw Snake Body
         for idx, (x, y) in enumerate(self.env.snake):
             rect = pygame.Rect(
                 x * self.block_size, y * self.block_size,
                 self.block_size, self.block_size
             )
-            color = self.HEAD_GREEN if idx == 0 else self.GREEN
+            color = self.HEAD_BLUE if idx == 0 else self.GREEN
+            
             pygame.draw.rect(self.screen, color, rect)
             pygame.draw.rect(self.screen, self.BLACK, rect, 1)
-
         # 2. Draw Food
         fx, fy = self.env.food
         food_rect = pygame.Rect(
